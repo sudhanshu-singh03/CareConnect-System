@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Settings, BarChart2, CheckCircle, Activity, Users, FileText, UserPlus, X } from 'lucide-react';
+import { Settings, BarChart2, CheckCircle, Activity, Users, FileText, UserPlus, X, Calendar, Clock } from 'lucide-react';
 
 const AdminDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -198,7 +198,7 @@ const AdminDashboard = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slot / Time</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time Slot</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
@@ -214,8 +214,9 @@ const AdminDashboard = () => {
                                         <div className="text-sm text-gray-500">{apt.doctorId?.specialization}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div className="font-semibold text-slate-800">{apt.slot}</div>
-                                        {new Date(apt.assignedTime).toLocaleString()}
+                                        <div className="font-semibold text-indigo-600 flex items-center mb-1"><Calendar className="w-4 h-4 mr-1" /> {apt.appointmentDate}</div>
+                                        <div className="font-semibold text-slate-800 flex items-center"><Clock className="w-4 h-4 mr-1 text-slate-400" /> {apt.slot}</div>
+                                        <div className="text-xs text-slate-400 mt-1">Assigned: {new Date(apt.assignedTime).toLocaleDateString()}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 capitalize">

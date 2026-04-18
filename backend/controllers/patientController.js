@@ -5,7 +5,7 @@ const { runScheduler } = require('../services/scheduler');
 
 const createRequest = async (req, res) => {
   try {
-    const { urgency, preferredSlots, preferredDepartment } = req.body;
+    const { urgency, preferredSlots, preferredDepartment, preferredDate } = req.body;
     
     // Check if patient already has a pending request
     const existingRequest = await Request.findOne({ patientId: req.user._id, status: 'pending' });
@@ -18,6 +18,7 @@ const createRequest = async (req, res) => {
       patientAge: req.user.age,
       urgency,
       preferredDepartment: preferredDepartment || null,
+      preferredDate,
       preferredSlots
     });
 
@@ -36,8 +37,9 @@ const getPatientAppointments = async (req, res) => {
       .sort({ assignedTime: -1 });
       
     const pendingRequest = await Request.findOne({ patientId: req.user._id, status: 'pending' });
+    const notBookedRequest = await Request.findOne({ patientId: req.user._id, status: 'not booked' }).sort({ createdAt: -1 });
     
-    res.json({ appointments, pendingRequest });
+    res.json({ appointments, pendingRequest, notBookedRequest });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

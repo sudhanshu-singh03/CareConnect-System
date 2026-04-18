@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Users, Clock } from 'lucide-react';
+import { Users, Clock, Calendar } from 'lucide-react';
 
 const DoctorDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -53,7 +53,7 @@ const DoctorDashboard = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Slot</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time Slot</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
@@ -67,6 +67,9 @@ const DoctorDashboard = () => {
                                         {apt.patientId?.age}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mr-2 mb-1 lg:mb-0">
+                                            <Calendar className="w-3 h-3 mr-1" /> {apt.appointmentDate}
+                                        </span>
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             <Clock className="w-3 h-3 mr-1" /> {apt.slot}
                                         </span>

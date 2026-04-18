@@ -7,10 +7,12 @@ const PatientDashboard = () => {
     const { user } = useContext(AuthContext);
     const [appointments, setAppointments] = useState([]);
     const [pendingRequest, setPendingRequest] = useState(null);
+    const [notBookedRequest, setNotBookedRequest] = useState(null);
     const [doctors, setDoctors] = useState([]);
     
     // Form state
     const [urgency, setUrgency] = useState(1);
+    const [preferredDate, setPreferredDate] = useState('');
     const [preferredSlots, setPreferredSlots] = useState([]);
     const [preferredDepartment, setPreferredDepartment] = useState('');
     const availableTimeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM'];
@@ -24,6 +26,7 @@ const PatientDashboard = () => {
             ]);
             setAppointments(apptRes.data.appointments);
             setPendingRequest(apptRes.data.pendingRequest);
+            setNotBookedRequest(apptRes.data.notBookedRequest);
             setDoctors(docsRes.data);
         } catch (err) {
             console.error(err);
@@ -47,7 +50,7 @@ const PatientDashboard = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             await axios.post('http://localhost:5000/api/patient/request', {
-                urgency, preferredSlots, preferredDepartment: preferredDepartment || null
+                urgency, preferredSlots, preferredDepartment: preferredDepartment || null, preferredDate
             }, config);
             fetchData();
         } catch (err) {
@@ -95,6 +98,7 @@ const PatientDashboard = () => {
                                         You have a pending request waiting for the scheduler to run. Priorities will be calculated dynamically.
                                     </p>
                                     <p className="font-medium mt-2 text-sm text-yellow-800">
+                                        Date: {pendingRequest.preferredDate} <br/>
                                         Preferred Slots: {pendingRequest.preferredSlots.join(', ')}
                                     </p>
                                 </div>
@@ -102,6 +106,27 @@ const PatientDashboard = () => {
                         </div>
                     ) : (
                         <form onSubmit={submitRequest}>
+                            {notBookedRequest && (
+                                <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 relative">
+                                    <div className="flex">
+                                        <div className="flex-shrink-0">
+                                            <AlertCircle className="h-5 w-5 text-red-500" />
+                                        </div>
+                                        <div className="ml-3">
+                                            <p className="text-sm text-red-700">
+                                                Your last request for <strong>{notBookedRequest.preferredDate}</strong> was <span className="font-bold">NOT BOOKED</span> because no doctors were available for the selected department/slots. Please try different slots or dates.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setNotBookedRequest(null)}
+                                        className="absolute top-2 right-2 text-red-400 hover:text-red-600"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            )}
                             <div className="mb-4">
                                 <label className="block text-slate-700 font-medium mb-2">Urgency Level (1-5)</label>
                                 <div className="flex items-center space-x-2">
@@ -109,6 +134,18 @@ const PatientDashboard = () => {
                                     <span className="font-bold text-lg">{urgency}</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-1">1: Routine Checkup, 5: Critical/Immediate Need</p>
+                            </div>
+                            
+                            <div className="mb-4">
+                                <label className="block text-slate-700 font-medium mb-2">Preferred Date</label>
+                                <input 
+                                    type="date" 
+                                    required
+                                    value={preferredDate} 
+                                    onChange={(e) => setPreferredDate(e.target.value)} 
+                                    min={new Date().toISOString().split("T")[0]}
+                                    className="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                                />
                             </div>
                             
                             <div className="mb-6">
@@ -159,6 +196,8 @@ const PatientDashboard = () => {
                                         <p className="font-bold text-lg text-slate-800">{apt.doctorId?.name}</p>
                                         <p className="text-sm text-slate-600">{apt.doctorId?.specialization}</p>
                                         <div className="mt-2 flex items-center text-sm font-medium text-slate-700 bg-white inline-block px-2 py-1 rounded shadow-sm border">
+                                            <Calendar className="w-4 h-4 mr-1 text-indigo-500 inline" /> {apt.appointmentDate}
+                                            <span className="text-slate-300 mx-2">|</span>
                                             <Clock className="w-4 h-4 mr-1 text-indigo-500 inline" /> {apt.slot}
                                         </div>
                                         <span className="absolute top-4 right-4 capitalize font-semibold text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
@@ -184,6 +223,8 @@ const PatientDashboard = () => {
                                         <p className="font-bold text-lg text-slate-700">{apt.doctorId?.name}</p>
                                         <p className="text-sm text-slate-500">{apt.doctorId?.specialization}</p>
                                         <div className="mt-2 flex items-center text-sm font-medium text-slate-500 bg-white inline-block px-2 py-1 rounded shadow-sm border">
+                                            <Calendar className="w-4 h-4 mr-1 text-slate-400 inline" /> {apt.appointmentDate}
+                                            <span className="text-slate-300 mx-2">|</span>
                                             <Clock className="w-4 h-4 mr-1 text-slate-400 inline" /> {apt.slot} - {new Date(apt.assignedTime).toLocaleDateString()}
                                         </div>
                                         <span className={`absolute top-4 right-4 capitalize font-semibold text-xs px-2 py-1 rounded ${apt.status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>

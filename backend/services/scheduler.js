@@ -44,7 +44,8 @@ const runScheduler = async () => {
         for (let preferredSlot of req.preferredSlots) {
             // Find doctors who have this slot available and match the department
             let availableDoctors = drState.filter(d => {
-                const hasSlot = d.slots.includes(preferredSlot) && !d.assignedToSlot[preferredSlot];
+                const availabilityKey = `${req.preferredDate}_${preferredSlot}`;
+                const hasSlot = d.slots.includes(preferredSlot) && !d.assignedToSlot[availabilityKey];
                 const matchesDept = req.preferredDepartment ? (d.specialization === req.preferredDepartment) : true;
                 return hasSlot && matchesDept;
             });
@@ -61,6 +62,7 @@ const runScheduler = async () => {
                     requestId: req._id,
                     patientId: req.patientId._id,
                     doctorId: selectedDoctor.id,
+                    appointmentDate: req.preferredDate,
                     slot: preferredSlot,
                     status: 'scheduled'
                 });
@@ -73,7 +75,8 @@ const runScheduler = async () => {
                 fulfilledRequests.push(req);
 
                 // Update Doctor State
-                selectedDoctor.assignedToSlot[preferredSlot] = apt._id;
+                const availabilityKey = `${req.preferredDate}_${preferredSlot}`;
+                selectedDoctor.assignedToSlot[availabilityKey] = apt._id;
                 selectedDoctor.currentLoad += 1;
                 
                 // Also update the database doctor load
@@ -83,7 +86,10 @@ const runScheduler = async () => {
                 break; // Patient is assigned, move to next patient
             }
         }
-        // If assigned == false, no slots could be matched. Stays pending.
+        if (!assigned) {
+            req.status = 'not booked';
+            await req.save();
+        }
     }
 
     // Calculate Metrics
