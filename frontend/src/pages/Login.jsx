@@ -21,7 +21,7 @@ const Login = () => {
 
     return (
         <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow">
-            <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">Login to MediSchedule</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">Login into CareConnect system</h2>
             {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
