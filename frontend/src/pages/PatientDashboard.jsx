@@ -154,7 +154,7 @@ const PatientDashboard = () => {
                                     required
                                     value={preferredDate} 
                                     onChange={(e) => setPreferredDate(e.target.value)} 
-                                    min={new Date().toISOString().split("T")[0]}
+                                    min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0]}
                                     className="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" 
                                 />
                             </div>
