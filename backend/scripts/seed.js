@@ -10,7 +10,7 @@ dotenv.config({ path: '../.env' }); // Adjust if run from root
 
 const seedDatabase = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/appointment-scheduler');
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/careconnect');
 
         console.log('Clearing old data...');
         await User.deleteMany();

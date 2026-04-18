@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/appointment-scheduler').then(() => {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/careconnect').then(() => {
     console.log('MongoDB connected');
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }).catch((error) => {

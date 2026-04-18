@@ -1,10 +1,11 @@
 const Request = require('../models/Request');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
+const { runScheduler } = require('../services/scheduler');
 
 const createRequest = async (req, res) => {
   try {
-    const { urgency, preferredSlots, preferredDoctorId } = req.body;
+    const { urgency, preferredSlots, preferredDepartment } = req.body;
     
     // Check if patient already has a pending request
     const existingRequest = await Request.findOne({ patientId: req.user._id, status: 'pending' });
@@ -16,9 +17,11 @@ const createRequest = async (req, res) => {
       patientId: req.user._id,
       patientAge: req.user.age,
       urgency,
-      preferredDoctorId: preferredDoctorId || null,
+      preferredDepartment: preferredDepartment || null,
       preferredSlots
     });
+
+    await runScheduler();
 
     res.status(201).json(request);
   } catch (error) {

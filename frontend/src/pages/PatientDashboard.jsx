@@ -12,7 +12,7 @@ const PatientDashboard = () => {
     // Form state
     const [urgency, setUrgency] = useState(1);
     const [preferredSlots, setPreferredSlots] = useState([]);
-    const [preferredDoctorId, setPreferredDoctorId] = useState('');
+    const [preferredDepartment, setPreferredDepartment] = useState('');
     const availableTimeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM'];
 
     const fetchData = async () => {
@@ -47,13 +47,15 @@ const PatientDashboard = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             await axios.post('http://localhost:5000/api/patient/request', {
-                urgency, preferredSlots, preferredDoctorId: preferredDoctorId || null
+                urgency, preferredSlots, preferredDepartment: preferredDepartment || null
             }, config);
             fetchData();
         } catch (err) {
             alert(err.response?.data?.message || 'Error submitting request');
         }
     };
+
+    const departments = [...new Set(doctors.map(doc => doc.specialization))].filter(Boolean);
 
     return (
         <div className="space-y-6">
@@ -67,16 +69,16 @@ const PatientDashboard = () => {
                     </h2>
                     
                     <div className="mb-4">
-                        <label className="block text-slate-700 font-medium mb-2">Available Doctors (Tentative Selection)</label>
+                        <label className="block text-slate-700 font-medium mb-2">Available Departments</label>
                         <select 
-                            value={preferredDoctorId} 
-                            onChange={(e) => setPreferredDoctorId(e.target.value)}
+                            value={preferredDepartment} 
+                            onChange={(e) => setPreferredDepartment(e.target.value)}
                             className="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         >
-                            <option value="">No Preference (Algorithm will decide)</option>
-                            {doctors.map(doc => (
-                                <option key={doc._id} value={doc._id}>
-                                    {doc.name} - {doc.specialization}
+                            <option value="">No Preference (Any Department)</option>
+                            {departments.map(dept => (
+                                <option key={dept} value={dept}>
+                                    {dept}
                                 </option>
                             ))}
                         </select>

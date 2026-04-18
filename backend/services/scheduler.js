@@ -27,6 +27,7 @@ const runScheduler = async () => {
     let drState = doctors.map(d => ({
         id: d._id,
         name: d.name,
+        specialization: d.specialization,
         slots: [...d.availableSlots],
         currentLoad: d.currentLoad,
         assignedToSlot: {} // slot -> appointmentId
@@ -41,27 +42,19 @@ const runScheduler = async () => {
         let assigned = false;
         
         for (let preferredSlot of req.preferredSlots) {
-            // Find doctors who have this slot available
-            let availableDoctors = drState.filter(d => d.slots.includes(preferredSlot) && !d.assignedToSlot[preferredSlot]);
+            // Find doctors who have this slot available and match the department
+            let availableDoctors = drState.filter(d => {
+                const hasSlot = d.slots.includes(preferredSlot) && !d.assignedToSlot[preferredSlot];
+                const matchesDept = req.preferredDepartment ? (d.specialization === req.preferredDepartment) : true;
+                return hasSlot && matchesDept;
+            });
             
             if (availableDoctors.length > 0) {
                 let selectedDoctor;
                 
-                // First try to assign to preferred doctor if they are available
-                if (req.preferredDoctorId) {
-                    const prefDocIdStr = req.preferredDoctorId.toString();
-                    const prefDocIndex = availableDoctors.findIndex(d => d.id.toString() === prefDocIdStr);
-                    if (prefDocIndex !== -1) {
-                        selectedDoctor = availableDoctors[prefDocIndex];
-                    }
-                }
-                
-                // If preferred doctor is not available or not chosen, use load balancing
-                if (!selectedDoctor) {
-                    // Load Balancing: Pick the doctor with the minimum currentLoad among available doctors
-                    availableDoctors.sort((a, b) => a.currentLoad - b.currentLoad);
-                    selectedDoctor = availableDoctors[0];
-                }
+                // Load Balancing: Pick the doctor with the minimum currentLoad among available doctors
+                availableDoctors.sort((a, b) => a.currentLoad - b.currentLoad);
+                selectedDoctor = availableDoctors[0];
 
                 // Create appointment
                 const apt = new Appointment({
