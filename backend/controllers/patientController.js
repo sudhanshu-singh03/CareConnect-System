@@ -54,4 +54,25 @@ const getDoctors = async (req, res) => {
   }
 }
 
-module.exports = { createRequest, getPatientAppointments, getDoctors };
+const cancelAppointment = async (req, res) => {
+    try {
+        const appointment = await Appointment.findOne({ _id: req.params.id, patientId: req.user._id });
+        if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+        if (appointment.status !== 'scheduled') {
+            return res.status(400).json({ message: 'Only scheduled appointments can be cancelled.' });
+        }
+        
+        appointment.status = 'cancelled';
+        await appointment.save();
+
+        if (appointment.doctorId) {
+            await Doctor.findByIdAndUpdate(appointment.doctorId, { $inc: { currentLoad: -1 } });
+        }
+
+        res.json({ message: 'Appointment cancelled successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createRequest, getPatientAppointments, getDoctors, cancelAppointment };

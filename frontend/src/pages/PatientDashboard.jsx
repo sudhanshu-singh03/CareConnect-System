@@ -58,6 +58,17 @@ const PatientDashboard = () => {
         }
     };
 
+    const handleCancelAppointment = async (id) => {
+        if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            await axios.put(`http://localhost:5000/api/patient/appointment/${id}/cancel`, {}, config);
+            fetchData();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Error cancelling appointment');
+        }
+    };
+
     const departments = [...new Set(doctors.map(doc => doc.specialization))].filter(Boolean);
 
     return (
@@ -200,9 +211,17 @@ const PatientDashboard = () => {
                                             <span className="text-slate-300 mx-2">|</span>
                                             <Clock className="w-4 h-4 mr-1 text-indigo-500 inline" /> {apt.slot}
                                         </div>
-                                        <span className="absolute top-4 right-4 capitalize font-semibold text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
-                                            {apt.status}
-                                        </span>
+                                        <div className="absolute top-4 right-4 flex space-x-2">
+                                            <span className="capitalize font-semibold text-xs px-2 py-1 bg-green-100 text-green-800 rounded flex items-center">
+                                                {apt.status}
+                                            </span>
+                                            <button 
+                                                onClick={() => handleCancelAppointment(apt._id)}
+                                                className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs px-3 py-1 rounded shadow-sm transition-colors font-semibold"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
